@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  User
+  Admin
+}
+
+enum BookingStatus {
+  Pending
+  Confirmed
+  Cancelled
+}
+
+enum PaymentStatus {
+  Pending
+  Completed
+  Failed
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  password String
+  role     UserRole  @default(User)
+  bookings Booking[]
+}
+
+model Futsal {
+  id           Int           @id @default(autoincrement())
+  name         String
+  location     String
+  pricePerHour Float
+  images       FutsalImage[] // One-to-many relationship with FutsalImage
+  bookings     Booking[]
+}
+
+model FutsalImage {
+  id       Int    @id @default(autoincrement())
+  url      String // URL or file path of the image
+  futsalId Int
+  futsal   Futsal @relation(fields: [futsalId], references: [id])
+}
+
+model Booking {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  futsalId  Int
+  startTime DateTime
+  endTime   DateTime
+  status    BookingStatus @default(Pending)
+  payment   Payment?
+  user      User          @relation(fields: [userId], references: [id])
+  futsal    Futsal        @relation(fields: [futsalId], references: [id])
+}
+
+model Payment {
+  id        Int           @id @default(autoincrement())
+  bookingId Int           @unique
+  amount    Float
+  status    PaymentStatus @default(Pending)
+  booking   Booking       @relation(fields: [bookingId], references: [id])
+}
