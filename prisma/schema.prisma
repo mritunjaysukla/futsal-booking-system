@@ -31,11 +31,13 @@ enum PaymentStatus {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  password String
-  role     UserRole  @default(User)
-  bookings Booking[]
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  role       UserRole  @default(User)
+  resetToken String?
+  bookings   Booking[]
+  Review     Review[]
 }
 
 model Futsal {
@@ -45,6 +47,7 @@ model Futsal {
   pricePerHour Float
   images       FutsalImage[] // One-to-many relationship with FutsalImage
   bookings     Booking[]
+  Review       Review[]
 }
 
 model FutsalImage {
@@ -72,4 +75,14 @@ model Payment {
   amount    Float
   status    PaymentStatus @default(Pending)
   booking   Booking       @relation(fields: [bookingId], references: [id])
+}
+
+model Review {
+  id       Int     @id @default(autoincrement())
+  rating   Int
+  comment  String?
+  userId   Int
+  futsalId Int
+  user     User    @relation(fields: [userId], references: [id])
+  futsal   Futsal  @relation(fields: [futsalId], references: [id])
 }
